@@ -5,10 +5,8 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +22,7 @@ public class DataParser {
             throw new IllegalArgumentException("Not a directory: " + folderPath);
         }
 
-        File[] files = folder.listFiles((file -> file.isFile()));
+        File[] files = folder.listFiles((file -> file.isFile() && file.getName().endsWith(".json")));
         for (File file : files) {
             try {
                 String content = Files.readString(file.toPath());
