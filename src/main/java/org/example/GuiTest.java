@@ -12,7 +12,6 @@ public class GuiTest {
         GUI gui = new GUI();
 
 
-
         folderPath = gui.folder;
         try {
             songs = parser.getSongs(folderPath.getPath());
