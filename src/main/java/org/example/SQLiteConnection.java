@@ -46,11 +46,20 @@ public class SQLiteConnection {
 
     public void connect() {
         try (var connection = DriverManager.getConnection(jdbcUrl)) {
-            System.out.println("Created/Connected to database...");
+            executeTransaction(connection);
+        } catch (final SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private void executeTransaction(final Connection connection) throws SQLException {
+        try {
+            connection.setAutoCommit(false);
 
             createTable(connection);
             insertSongs(connection, parser.getSongs(jsonPath));
         } catch (final Exception e) {
+            connection.rollback();
             System.err.println(e.getMessage());
         }
     }
@@ -58,26 +67,24 @@ public class SQLiteConnection {
     private void createTable(final Connection connection) throws SQLException {
         try (var statement = connection.createStatement()) {
             statement.execute(sqlCreateTable);
-            System.out.println("Created table...");
         }
     }
 
     private void insertSongs(final Connection connection, final List<Song> songs) throws SQLException {
         try (var statement = connection.prepareStatement(sqlInsert)) {
             prepareBatch(statement, songs);
-            // TODO: split into multiple batches
 
-            System.out.println("Executing prepared statements...");
+            System.out.println("Populating database...");
             final long start = System.currentTimeMillis();
             final var results = statement.executeBatch();
             final double elapsed = (System.currentTimeMillis() - start) / 1000.0;
-
             System.out.println("Inserted " + Arrays.stream(results).filter(r -> r > 0).count() + " rows in " + elapsed + "seconds");
+
+            connection.commit();
         }
     }
 
     private static void prepareBatch(final PreparedStatement statement, final List<Song> songList) throws SQLException {
-        System.out.println("Preparing statements...");
         for (final Song song : songList) {
             statement.setString(1, song.timeStamp());
             statement.setString(2, song.username());
@@ -99,6 +106,5 @@ public class SQLiteConnection {
             statement.setInt(18, song.incognitoMode() ? 1 : 0);
             statement.addBatch();
         }
-        System.out.println("Finished preparing statements...");
     }
 }

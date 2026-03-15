@@ -5,6 +5,7 @@ target/
 .kotlin
 data_source_mapping.xml
 dataSources.xml
+holymoly.sql
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
