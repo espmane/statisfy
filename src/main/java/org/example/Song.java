@@ -20,5 +20,5 @@ public record Song(
         @SerializedName("skipped") Boolean skipped,
         @SerializedName("offline") Boolean offline,
         @SerializedName("offline_timestamp") Long offlineTimestamp,
-        @SerializedName("incognito_mode") boolean incognitoMode) {
+        @SerializedName("incognito_mode") Boolean incognitoMode) {
 }

@@ -14,24 +14,26 @@ public class DataParser {
     private static final Gson GSON = new Gson();
     private static final Type LIST_TYPE = new TypeToken<List<Song>>() {}.getType();
 
-    public List<Song> getSongs(String folderPath) throws IOException {
-        var folder = new File(folderPath);
-        List<Song> songs = new ArrayList<>();
+    public List<Song> getSongs(final String folderPath) throws IOException {
+        final var folder = new File(folderPath);
+        final List<Song> songs = new ArrayList<>();
 
         if (!folder.exists() || !folder.isDirectory()) {
             throw new IllegalArgumentException("Not a directory: " + folderPath);
         }
 
-        File[] files = folder.listFiles((file -> file.isFile() && file.getName().endsWith(".json")));
-        for (File file : files) {
-            try {
-                String content = Files.readString(file.toPath());
-                List<Song> parsed = GSON.fromJson(content, LIST_TYPE);
-                if (parsed != null) {
-                    songs.addAll(parsed);
+        final File[] files = folder.listFiles((file -> file.isFile() && file.getName().endsWith(".json")));
+        if (files != null) {
+            for (final File file : files) {
+                try {
+                    final String content = Files.readString(file.toPath());
+                    final List<Song> parsed = GSON.fromJson(content, LIST_TYPE);
+                    if (parsed != null) {
+                        songs.addAll(parsed);
+                    }
+                } catch (final IOException e) {
+                    throw new IOException("Failed to read file: " + file.getPath(), e);
                 }
-            } catch (IOException e) {
-                throw new IOException("Failed to read file: " + file.getPath(), e);
             }
         }
         return songs;
