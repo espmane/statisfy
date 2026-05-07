@@ -12,7 +12,8 @@ import com.google.gson.reflect.TypeToken;
 
 public class DataParser {
     private static final Gson GSON = new Gson();
-    private static final Type LIST_TYPE = new TypeToken<List<Song>>() {}.getType();
+    private static final Type LIST_TYPE = new TypeToken<List<Song>>() {
+    }.getType();
 
     public List<Song> getSongs(final String folderPath) throws IOException {
         final var folder = new File(folderPath);
