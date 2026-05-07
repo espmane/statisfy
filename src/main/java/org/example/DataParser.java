@@ -23,6 +23,7 @@ public class DataParser {
             throw new IllegalArgumentException("Not a directory: " + folderPath);
         }
 
+
         final File[] files = folder.listFiles((file -> file.isFile() && file.getName().endsWith(".json")));
         if (files != null) {
             for (final File file : files) {
