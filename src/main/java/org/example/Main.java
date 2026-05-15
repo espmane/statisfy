@@ -1,8 +1,11 @@
 package org.example;
 
 public class Main {
+    private static final String jsonPath = "/home/esp/Downloads/spotify";
+    private static final String dbPath = "my.db"; // need to be changed to absolute path
+
     static void main() {
-        final SQLiteConnection SQLite = new SQLiteConnection();
-        SQLite.connect();
+        final var db = new DatabaseConnection(dbPath);
+        db.connect(jsonPath);
     }
 }
