@@ -5,10 +5,12 @@ import java.sql.SQLException;
 
 public class DatabaseConnection {
     private final String jdbcUrl;
+    private final SongWriter songWriter;
 
 
     public DatabaseConnection(final String dbPath) {
         this.jdbcUrl = "jdbc:sqlite:" + dbPath;
+        this.songWriter = new SongWriter();
     }
 
     public void connect(final String jsonPath) {

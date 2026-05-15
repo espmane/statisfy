@@ -1,5 +1,6 @@
 package org.example;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -15,6 +16,15 @@ public class SongWriter {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT DO NOTHING;
             """;
+
+
+    public void insertSongs(final Connection connection, final List<Song> songs) throws SQLException {
+        try (var statement = connection.prepareStatement(SQL_INSERT)) {
+            prepareBatch(statement, songs);
+            statement.executeBatch();
+            connection.commit();
+        }
+    }
 
     private void prepareBatch(final PreparedStatement statement, final List<Song> songs) throws SQLException {
         for (final Song song : songs) {
