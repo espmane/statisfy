@@ -1,4 +1,4 @@
-package org.example;
+package org.example.parser;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,6 +6,8 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.example.model.Song;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -23,7 +25,8 @@ public class DataParser {
         }
 
         final File[] files = folder.listFiles((file -> file.isFile() && file.getName().endsWith(".json")));
-        if (files == null) throw new IOException("Failed to list files in: " + folderPath);
+        if (files == null)
+            throw new IOException("Failed to list files in: " + folderPath);
 
         for (final File file : files) {
             try {

@@ -1,4 +1,4 @@
-package org.example;
+package org.example.model;
 
 import com.google.gson.annotations.SerializedName;
 

@@ -1,9 +1,11 @@
-package org.example;
+package org.example.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+
+import org.example.model.Song;
 
 public class SongWriter {
     private static final String SQL_INSERT = """
@@ -16,7 +18,6 @@ public class SongWriter {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT DO NOTHING;
             """;
-
 
     public void insertSongs(final Connection connection, final List<Song> songs) throws SQLException {
         try (var statement = connection.prepareStatement(SQL_INSERT)) {

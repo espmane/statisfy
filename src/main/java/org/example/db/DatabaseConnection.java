@@ -1,14 +1,15 @@
-package org.example;
+package org.example.db;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import org.example.parser.DataParser;
 
 public class DatabaseConnection {
     private final String jdbcUrl;
     private final SongWriter songWriter;
     private final DatabaseManager dbManager;
     private final DataParser dataParser;
-
 
     public DatabaseConnection(final String dbPath) {
         this.jdbcUrl = "jdbc:sqlite:" + dbPath;
