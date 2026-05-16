@@ -1,11 +1,8 @@
 package org.example.stats;
 
-public final class TimeStats {
+public enum TimeStats {
 
-    private TimeStats() {
-    }
-
-    public static final String BY_YEAR = """
+    BY_YEAR("""
             SELECT STRFTIME('%Y', time_stamp)                        AS year,
                    COUNT(*)                                          AS play_count,
                    ROUND(SUM(ms_played) / 3600000.0, 1)              AS hours_played,
@@ -14,18 +11,18 @@ public final class TimeStats {
             FROM songs
             WHERE spotify_track_uri IS NOT NULL
             GROUP BY year
-            ORDER BY year;""";
+            ORDER BY year;"""),
 
-    public static final String BY_MONTH = """
+    BY_MONTH("""
             SELECT STRFTIME('%Y-%m', time_stamp)        AS month,
                    COUNT(*)                             AS play_count,
                    ROUND(SUM(ms_played) / 3600000.0, 1) AS hours_played
             FROM songs
             WHERE spotify_track_uri IS NOT NULL
             GROUP BY month
-            ORDER BY month;""";
+            ORDER BY month;"""),
 
-    public static final String MOST_ACTIVE_MONTHS = """
+    MOST_ACTIVE_MONTHS("""
             SELECT STRFTIME('%Y-%m', time_stamp)        AS month,
                    ROUND(SUM(ms_played) / 3600000.0, 1) AS hours_played,
                    COUNT(*)                             AS play_count
@@ -33,9 +30,9 @@ public final class TimeStats {
             WHERE spotify_track_uri IS NOT NULL
             GROUP BY month
             ORDER BY hours_played DESC
-            LIMIT 12;""";
+            LIMIT 12;"""),
 
-    public static final String BY_DAY_OF_WEEK = """
+    BY_DAY_OF_WEEK("""
             SELECT CASE STRFTIME('%w', time_stamp)
                        WHEN '0' THEN '0_Sunday'
                        WHEN '1' THEN '1_Monday'
@@ -51,18 +48,18 @@ public final class TimeStats {
             FROM songs
             WHERE spotify_track_uri IS NOT NULL
             GROUP BY STRFTIME('%w', time_stamp)
-            ORDER BY day_of_week;""";
+            ORDER BY day_of_week;"""),
 
-    public static final String BY_HOUR = """
+    BY_HOUR("""
             SELECT STRFTIME('%H', time_stamp)           AS hour_of_day,
                    COUNT(*)                             AS play_count,
                    ROUND(SUM(ms_played) / 3600000.0, 1) AS hours_played
             FROM songs
             WHERE spotify_track_uri IS NOT NULL
             GROUP BY hour_of_day
-            ORDER BY hour_of_day;""";
+            ORDER BY hour_of_day;"""),
 
-    public static final String HEATMAP = """
+    HEATMAP("""
             SELECT CASE STRFTIME('%w', time_stamp)
                        WHEN '0' THEN '0_Sun'
                        WHEN '1' THEN '1_Mon'
@@ -78,9 +75,9 @@ public final class TimeStats {
             FROM songs
             WHERE spotify_track_uri IS NOT NULL
             GROUP BY STRFTIME('%w', time_stamp), hour
-            ORDER BY day_of_week, hour;""";
+            ORDER BY day_of_week, hour;"""),
 
-    public static final String ROLLING_30D = """
+    ROLLING_30D("""
             SELECT DATE(time_stamp)  AS day,
                    SUM(SUM(ms_played)) OVER (
                        ORDER BY DATE(time_stamp)
@@ -89,9 +86,9 @@ public final class TimeStats {
             FROM songs
             WHERE spotify_track_uri IS NOT NULL
             GROUP BY DATE(time_stamp)
-            ORDER BY day;""";
+            ORDER BY day;"""),
 
-    public static final String LONGEST_SESSIONS = """
+    LONGEST_SESSIONS("""
             WITH gaps AS (SELECT *,
                                  CAST(
                                          (JULIANDAY(time_stamp) - JULIANDAY(
@@ -116,9 +113,9 @@ public final class TimeStats {
             FROM session_labels
             GROUP BY session_id
             ORDER BY hours_played DESC
-            LIMIT 20;""";
+            LIMIT 20;"""),
 
-    public static final String SESSIONS_BY_DAY_OF_WEEK = """
+    SESSIONS_BY_DAY_OF_WEEK("""
             WITH gaps AS (SELECT *,
                                  CAST(
                                          (JULIANDAY(time_stamp) - JULIANDAY(
@@ -151,9 +148,9 @@ public final class TimeStats {
                    ROUND(AVG(session_ms) / 3600000.0, 2) AS avg_session_hours
             FROM session_stats
             GROUP BY dow
-            ORDER BY dow;""";
+            ORDER BY dow;"""),
 
-    public static final String FIRST_SONG_PER_YEAR = """
+    FIRST_SONG_PER_YEAR("""
             SELECT STRFTIME('%Y', time_stamp)        AS year,
                    master_metadata_track_name        AS track,
                    master_metadata_album_artist_name AS artist,
@@ -164,9 +161,9 @@ public final class TimeStats {
                                 FROM songs s2
                                 WHERE STRFTIME('%Y', s2.time_stamp) = STRFTIME('%Y', songs.time_stamp)
                                   AND s2.master_metadata_track_name IS NOT NULL)
-            ORDER BY year;""";
+            ORDER BY year;"""),
 
-    public static final String LAST_SONG_PER_YEAR = """
+    LAST_SONG_PER_YEAR("""
             SELECT STRFTIME('%Y', time_stamp)        AS year,
                    master_metadata_track_name        AS track,
                    master_metadata_album_artist_name AS artist,
@@ -177,9 +174,9 @@ public final class TimeStats {
                                 FROM songs s2
                                 WHERE STRFTIME('%Y', s2.time_stamp) = STRFTIME('%Y', songs.time_stamp)
                                   AND s2.master_metadata_track_name IS NOT NULL)
-            ORDER BY year;""";
+            ORDER BY year;"""),
 
-    public static final String NEW_YEARS_DAY = """
+    NEW_YEARS_DAY("""
             SELECT STRFTIME('%Y', time_stamp)        AS year,
                    master_metadata_track_name        AS track,
                    master_metadata_album_artist_name AS artist,
@@ -187,9 +184,9 @@ public final class TimeStats {
             FROM songs
             WHERE STRFTIME('%m-%d', time_stamp) = '01-01'
               AND master_metadata_track_name IS NOT NULL
-            ORDER BY time_stamp;""";
+            ORDER BY time_stamp;"""),
 
-    public static final String UNIQUE_ARTISTS_PER_MONTH = """
+    UNIQUE_ARTISTS_PER_MONTH("""
             SELECT STRFTIME('%Y-%m', time_stamp)                     AS month,
                    COUNT(DISTINCT master_metadata_album_artist_name) AS unique_artists,
                    COUNT(DISTINCT spotify_track_uri)                 AS unique_tracks,
@@ -197,9 +194,9 @@ public final class TimeStats {
             FROM songs
             WHERE spotify_track_uri IS NOT NULL
             GROUP BY month
-            ORDER BY month;""";
+            ORDER BY month;"""),
 
-    public static final String VARIETY_SCORE = """
+    VARIETY_SCORE("""
             SELECT STRFTIME('%Y-%m', time_stamp)                                  AS month,
                    COUNT(DISTINCT spotify_track_uri)                              AS unique_tracks,
                    COUNT(*)                                                       AS total_plays,
@@ -207,9 +204,9 @@ public final class TimeStats {
             FROM songs
             WHERE spotify_track_uri IS NOT NULL
             GROUP BY month
-            ORDER BY month;""";
+            ORDER BY month;"""),
 
-    public static final String BIGGEST_LISTENING_DAY = """
+    BIGGEST_LISTENING_DAY("""
             SELECT DATE(time_stamp)                     AS day,
                    ROUND(SUM(ms_played) / 3600000.0, 2) AS hours_played,
                    COUNT(*)                             AS tracks_played
@@ -217,9 +214,9 @@ public final class TimeStats {
             WHERE spotify_track_uri IS NOT NULL
             GROUP BY DATE(time_stamp)
             ORDER BY hours_played DESC
-            LIMIT 1;""";
+            LIMIT 1;"""),
 
-    public static final String DAYS_OVER_8_HOURS = """
+    DAYS_OVER_8_HOURS("""
             SELECT DATE(time_stamp)                                  AS day,
                    ROUND(SUM(ms_played) / 3600000.0, 1)              AS hours_played,
                    COUNT(*)                                          AS tracks_played,
@@ -228,5 +225,15 @@ public final class TimeStats {
             WHERE spotify_track_uri IS NOT NULL
             GROUP BY DATE(time_stamp)
             HAVING hours_played > 8
-            ORDER BY hours_played DESC;""";
+            ORDER BY hours_played DESC;""");
+
+    private final String query;
+
+    TimeStats(String query) {
+        this.query = query;
+    }
+
+    public String getQuery() {
+        return query;
+    }
 }

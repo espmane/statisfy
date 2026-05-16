@@ -1,11 +1,8 @@
 package org.example.stats;
 
-public final class TrackStats {
+public enum TrackStats {
 
-    private TrackStats() {
-    }
-
-    public static final String TOP_50_BY_PLAY_COUNT = """
+    TOP_50_BY_PLAY_COUNT("""
             SELECT master_metadata_track_name           AS track,
                    master_metadata_album_artist_name    AS artist,
                    master_metadata_album_name           AS album,
@@ -16,9 +13,9 @@ public final class TrackStats {
             WHERE master_metadata_track_name IS NOT NULL
             GROUP BY spotify_track_uri
             ORDER BY play_count DESC
-            LIMIT 50;""";
+            LIMIT 50;"""),
 
-    public static final String TOP_50_BY_TOTAL_TIME = """
+    TOP_50_BY_TOTAL_TIME("""
             SELECT master_metadata_track_name           AS track,
                    master_metadata_album_artist_name    AS artist,
                    COUNT(*)                             AS play_count,
@@ -27,9 +24,9 @@ public final class TrackStats {
             WHERE master_metadata_track_name IS NOT NULL
             GROUP BY spotify_track_uri
             ORDER BY total_hours DESC
-            LIMIT 50;""";
+            LIMIT 50;"""),
 
-    public static final String PLAYED_100_PLUS_TIMES = """
+    PLAYED_100_PLUS_TIMES("""
             SELECT master_metadata_track_name           AS track,
                    master_metadata_album_artist_name    AS artist,
                    COUNT(*)                             AS play_count,
@@ -38,9 +35,9 @@ public final class TrackStats {
             WHERE master_metadata_track_name IS NOT NULL
             GROUP BY spotify_track_uri
             HAVING play_count >= 100
-            ORDER BY play_count DESC;""";
+            ORDER BY play_count DESC;"""),
 
-    public static final String ONE_AND_DONE = """
+    ONE_AND_DONE("""
             SELECT master_metadata_track_name        AS track,
                    master_metadata_album_artist_name AS artist,
                    DATE(time_stamp)                  AS played_on,
@@ -49,9 +46,9 @@ public final class TrackStats {
             WHERE master_metadata_track_name IS NOT NULL
             GROUP BY spotify_track_uri
             HAVING COUNT(*) = 1
-            ORDER BY played_on DESC;""";
+            ORDER BY played_on DESC;"""),
 
-    public static final String LONGEST_SINGLE_PLAY = """
+    LONGEST_SINGLE_PLAY("""
             SELECT master_metadata_track_name        AS track,
                    master_metadata_album_artist_name AS artist,
                    time_stamp,
@@ -59,9 +56,9 @@ public final class TrackStats {
             FROM songs
             WHERE master_metadata_track_name IS NOT NULL
             ORDER BY ms_played DESC
-            LIMIT 20;""";
+            LIMIT 20;"""),
 
-    public static final String BINGE_DAYS = """
+    BINGE_DAYS("""
             SELECT DATE(time_stamp)                  AS day,
                    master_metadata_track_name        AS track,
                    master_metadata_album_artist_name AS artist,
@@ -70,9 +67,9 @@ public final class TrackStats {
             WHERE master_metadata_track_name IS NOT NULL
             GROUP BY DATE(time_stamp), spotify_track_uri
             ORDER BY plays_that_day DESC
-            LIMIT 20;""";
+            LIMIT 20;"""),
 
-    public static final String MOST_VARIED_PLAY_TIME = """
+    MOST_VARIED_PLAY_TIME("""
             SELECT master_metadata_track_name                           AS track,
                    master_metadata_album_artist_name                    AS artist,
                    COUNT(*)                                             AS play_count,
@@ -85,9 +82,9 @@ public final class TrackStats {
             GROUP BY spotify_track_uri
             HAVING play_count >= 10
             ORDER BY range_seconds DESC
-            LIMIT 30;""";
+            LIMIT 30;"""),
 
-    public static final String EARLY_SKIP = """
+    EARLY_SKIP("""
             SELECT master_metadata_track_name        AS track,
                    master_metadata_album_artist_name AS artist,
                    COUNT(*)                          AS play_count,
@@ -98,9 +95,9 @@ public final class TrackStats {
             HAVING play_count >= 5
                AND avg_seconds_played < 30
             ORDER BY avg_seconds_played ASC
-            LIMIT 30;""";
+            LIMIT 30;"""),
 
-    public static final String MOST_SKIPPED = """
+    MOST_SKIPPED("""
             SELECT master_metadata_track_name                AS track,
                    master_metadata_album_artist_name         AS artist,
                    COUNT(*)                                  AS total_plays,
@@ -112,9 +109,9 @@ public final class TrackStats {
             GROUP BY spotify_track_uri
             HAVING total_plays >= 5
             ORDER BY skip_rate_pct DESC
-            LIMIT 30;""";
+            LIMIT 30;"""),
 
-    public static final String MOST_COMPLETED = """
+    MOST_COMPLETED("""
             SELECT master_metadata_track_name                             AS track,
                    master_metadata_album_artist_name                      AS artist,
                    COUNT(*)                                               AS total_plays,
@@ -125,5 +122,15 @@ public final class TrackStats {
             GROUP BY spotify_track_uri
             HAVING total_plays >= 5
             ORDER BY completion_rate_pct DESC, total_plays DESC
-            LIMIT 30;""";
+            LIMIT 30;""");
+
+    private final String query;
+
+    TrackStats(String query) {
+        this.query = query;
+    }
+
+    public String getQuery() {
+        return query;
+    }
 }

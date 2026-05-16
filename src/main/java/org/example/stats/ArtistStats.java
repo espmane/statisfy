@@ -1,10 +1,8 @@
 package org.example.stats;
 
-public final class ArtistStats {
-    private ArtistStats() {
-    }
+public enum ArtistStats {
 
-    public static final String TOP_50_BY_PLAY_COUNT = """
+    TOP_50_BY_PLAY_COUNT("""
             SELECT master_metadata_album_artist_name          AS artist,
                    COUNT(*)                                   AS play_count,
                    ROUND(SUM(ms_played) / 3600000.0, 1)       AS total_hours,
@@ -14,9 +12,9 @@ public final class ArtistStats {
             WHERE master_metadata_album_artist_name IS NOT NULL
             GROUP BY master_metadata_album_artist_name
             ORDER BY play_count DESC
-            LIMIT 50;""";
+            LIMIT 50;"""),
 
-    public static final String TOP_50_BY_TOTAL_TIME = """
+    TOP_50_BY_TOTAL_TIME("""
             SELECT master_metadata_album_artist_name    AS artist,
                    ROUND(SUM(ms_played) / 3600000.0, 1) AS total_hours,
                    COUNT(*)                             AS play_count,
@@ -25,9 +23,9 @@ public final class ArtistStats {
             WHERE master_metadata_album_artist_name IS NOT NULL
             GROUP BY master_metadata_album_artist_name
             ORDER BY total_hours DESC
-            LIMIT 50;""";
+            LIMIT 50;"""),
 
-    public static final String TOP_PER_YEAR = """
+    TOP_PER_YEAR("""
             WITH ranked AS (SELECT STRFTIME('%Y', time_stamp)        AS year,
                                    master_metadata_album_artist_name AS artist,
                                    SUM(ms_played)                    AS ms,
@@ -42,9 +40,9 @@ public final class ArtistStats {
             SELECT year, artist, ROUND(ms / 3600000.0, 1) AS hours
             FROM ranked
             WHERE rnk = 1
-            ORDER BY year;""";
+            ORDER BY year;"""),
 
-    public static final String TOP_3_PER_YEAR = """
+    TOP_3_PER_YEAR("""
             WITH ranked AS (SELECT STRFTIME('%Y', time_stamp)        AS year,
                                    master_metadata_album_artist_name AS artist,
                                    SUM(ms_played)                    AS ms,
@@ -59,9 +57,9 @@ public final class ArtistStats {
             SELECT year, rnk AS rank, artist, ROUND(ms / 3600000.0, 1) AS hours
             FROM ranked
             WHERE rnk <= 3
-            ORDER BY year, rnk;""";
+            ORDER BY year, rnk;"""),
 
-    public static final String FIRST_AND_LAST_LISTEN = """
+    FIRST_AND_LAST_LISTEN("""
             SELECT master_metadata_album_artist_name                                    AS artist,
                    DATE(MIN(time_stamp))                                                AS first_listen,
                    DATE(MAX(time_stamp))                                                AS last_listen,
@@ -73,9 +71,9 @@ public final class ArtistStats {
             WHERE master_metadata_album_artist_name IS NOT NULL
             GROUP BY master_metadata_album_artist_name
             ORDER BY total_hours DESC
-            LIMIT 50;""";
+            LIMIT 50;"""),
 
-    public static final String ABANDONED = """
+    ABANDONED("""
             SELECT master_metadata_album_artist_name    AS artist,
                    ROUND(SUM(ms_played) / 3600000.0, 1) AS total_hours,
                    COUNT(*)                             AS total_plays,
@@ -86,9 +84,9 @@ public final class ArtistStats {
             HAVING total_hours > 5
                AND last_listened < DATE((SELECT MAX(time_stamp) FROM songs), '-365 days')
             ORDER BY total_hours DESC
-            LIMIT 30;""";
+            LIMIT 30;"""),
 
-    public static final String NEWLY_DISCOVERED = """
+    NEWLY_DISCOVERED("""
             SELECT master_metadata_album_artist_name    AS artist,
                    DATE(MIN(time_stamp))                AS first_heard,
                    COUNT(*)                             AS plays_since_discovery,
@@ -98,9 +96,9 @@ public final class ArtistStats {
             GROUP BY master_metadata_album_artist_name
             HAVING first_heard >= DATE((SELECT MAX(time_stamp) FROM songs), '-365 days')
             ORDER BY hours_since_discovery DESC
-            LIMIT 30;""";
+            LIMIT 30;"""),
 
-    public static final String NEW_PER_YEAR = """
+    NEW_PER_YEAR("""
             SELECT STRFTIME('%Y', first_heard) AS year,
                    COUNT(*)                    AS new_artists
             FROM (SELECT master_metadata_album_artist_name,
@@ -109,9 +107,9 @@ public final class ArtistStats {
                   WHERE master_metadata_album_artist_name IS NOT NULL
                   GROUP BY master_metadata_album_artist_name)
             GROUP BY year
-            ORDER BY year;""";
+            ORDER BY year;"""),
 
-    public static final String COMEBACK = """
+    COMEBACK("""
             WITH artist_plays AS (SELECT master_metadata_album_artist_name AS artist,
                                          time_stamp,
                                          LAG(time_stamp) OVER (
@@ -134,9 +132,9 @@ public final class ArtistStats {
             FROM gaps
             WHERE gap_days >= 365
             ORDER BY gap_days DESC
-            LIMIT 30;""";
+            LIMIT 30;"""),
 
-    public static final String MOST_SKIPPED = """
+    MOST_SKIPPED("""
             SELECT master_metadata_album_artist_name         AS artist,
                    COUNT(*)                                  AS total_plays,
                    SUM(skipped)                              AS skip_count,
@@ -147,9 +145,9 @@ public final class ArtistStats {
             GROUP BY master_metadata_album_artist_name
             HAVING total_plays >= 10
             ORDER BY skip_rate_pct DESC
-            LIMIT 30;""";
+            LIMIT 30;"""),
 
-    public static final String NEVER_SKIPPED = """
+    NEVER_SKIPPED("""
             SELECT master_metadata_album_artist_name                      AS artist,
                    COUNT(*)                                               AS total_plays,
                    ROUND(100.0 * (COUNT(*) - SUM(skipped)) / COUNT(*), 1) AS completion_rate_pct
@@ -159,9 +157,9 @@ public final class ArtistStats {
             GROUP BY master_metadata_album_artist_name
             HAVING total_plays >= 10
             ORDER BY completion_rate_pct DESC, total_plays DESC
-            LIMIT 30;""";
+            LIMIT 30;"""),
 
-    public static final String SHUFFLE_VS_LINEAR = """
+    SHUFFLE_VS_LINEAR("""
             SELECT master_metadata_album_artist_name                                         AS artist,
                    SUM(CASE WHEN shuffle = 1 THEN 1 ELSE 0 END)                              AS shuffle_plays,
                    SUM(CASE WHEN shuffle = 0 THEN 1 ELSE 0 END)                              AS linear_plays,
@@ -172,9 +170,9 @@ public final class ArtistStats {
             GROUP BY master_metadata_album_artist_name
             HAVING COUNT(*) >= 20
             ORDER BY shuffle_pct DESC
-            LIMIT 30;""";
+            LIMIT 30;"""),
 
-    public static final String CONCENTRATION_PER_YEAR = """
+    CONCENTRATION_PER_YEAR("""
             WITH yearly_total AS (SELECT STRFTIME('%Y', time_stamp) AS year, SUM(ms_played) AS total_ms
                                   FROM songs
                                   WHERE spotify_track_uri IS NOT NULL
@@ -196,5 +194,15 @@ public final class ArtistStats {
                      JOIN yearly_total yt ON ay.year = yt.year
             WHERE ay.rnk <= 10
             GROUP BY ay.year
-            ORDER BY ay.year;""";
+            ORDER BY ay.year;""");
+
+    private final String query;
+
+    ArtistStats(String query) {
+        this.query = query;
+    }
+
+    public String getQuery() {
+        return query;
+    }
 }

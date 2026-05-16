@@ -1,20 +1,17 @@
 package org.example.stats;
 
-public final class BehaviourStats {
+public enum BehaviourStats {
 
-    private BehaviourStats() {
-    }
-
-    public static final String OVERALL_SKIP_RATE = """
+    OVERALL_SKIP_RATE("""
             SELECT COUNT(*)                                  AS total_plays,
                    SUM(skipped)                              AS skipped_count,
                    COUNT(*) - SUM(skipped)                   AS completed_count,
                    ROUND(100.0 * SUM(skipped) / COUNT(*), 2) AS skip_rate_pct
             FROM songs
             WHERE skipped IS NOT NULL
-              AND spotify_track_uri IS NOT NULL;""";
+              AND spotify_track_uri IS NOT NULL;"""),
 
-    public static final String SKIP_RATE_BY_HOUR = """
+    SKIP_RATE_BY_HOUR("""
             SELECT STRFTIME('%H', time_stamp)                AS hour,
                    COUNT(*)                                  AS total_plays,
                    ROUND(100.0 * SUM(skipped) / COUNT(*), 1) AS skip_rate_pct
@@ -22,9 +19,9 @@ public final class BehaviourStats {
             WHERE skipped IS NOT NULL
               AND spotify_track_uri IS NOT NULL
             GROUP BY hour
-            ORDER BY hour;""";
+            ORDER BY hour;"""),
 
-    public static final String SKIP_RATE_BY_DAY_OF_WEEK = """
+    SKIP_RATE_BY_DAY_OF_WEEK("""
             SELECT CASE STRFTIME('%w', time_stamp)
                        WHEN '0' THEN '0_Sunday'
                        WHEN '1' THEN '1_Monday'
@@ -40,9 +37,9 @@ public final class BehaviourStats {
             WHERE skipped IS NOT NULL
               AND spotify_track_uri IS NOT NULL
             GROUP BY STRFTIME('%w', time_stamp)
-            ORDER BY day_of_week;""";
+            ORDER BY day_of_week;"""),
 
-    public static final String SKIP_RATE_BY_PLATFORM = """
+    SKIP_RATE_BY_PLATFORM("""
             SELECT platform,
                    COUNT(*)                                  AS total_plays,
                    ROUND(100.0 * SUM(skipped) / COUNT(*), 1) AS skip_rate_pct
@@ -51,9 +48,9 @@ public final class BehaviourStats {
               AND platform IS NOT NULL
               AND spotify_track_uri IS NOT NULL
             GROUP BY platform
-            ORDER BY skip_rate_pct DESC;""";
+            ORDER BY skip_rate_pct DESC;"""),
 
-    public static final String SHUFFLE_VS_LINEAR = """
+    SHUFFLE_VS_LINEAR("""
             SELECT CASE WHEN shuffle = 1 THEN 'Shuffle' ELSE 'Linear' END AS mode,
                    COUNT(*)                                               AS play_count,
                    ROUND(SUM(ms_played) / 3600000.0, 1)                   AS hours_played,
@@ -61,9 +58,9 @@ public final class BehaviourStats {
             FROM songs
             WHERE shuffle IS NOT NULL
               AND spotify_track_uri IS NOT NULL
-            GROUP BY shuffle;""";
+            GROUP BY shuffle;"""),
 
-    public static final String SKIP_ON_SHUFFLE = """
+    SKIP_ON_SHUFFLE("""
             SELECT CASE WHEN shuffle = 1 THEN 'Shuffle' ELSE 'Linear' END AS mode,
                    COUNT(*)                                               AS total_plays,
                    ROUND(100.0 * SUM(skipped) / COUNT(*), 2)              AS skip_rate_pct
@@ -71,18 +68,18 @@ public final class BehaviourStats {
             WHERE shuffle IS NOT NULL
               AND skipped IS NOT NULL
               AND spotify_track_uri IS NOT NULL
-            GROUP BY shuffle;""";
+            GROUP BY shuffle;"""),
 
-    public static final String SHUFFLE_OVER_YEARS = """
+    SHUFFLE_OVER_YEARS("""
             SELECT STRFTIME('%Y', time_stamp)                                                AS year,
                    ROUND(100.0 * SUM(CASE WHEN shuffle = 1 THEN 1 ELSE 0 END) / COUNT(*), 1) AS shuffle_pct
             FROM songs
             WHERE shuffle IS NOT NULL
               AND spotify_track_uri IS NOT NULL
             GROUP BY year
-            ORDER BY year;""";
+            ORDER BY year;"""),
 
-    public static final String PLATFORM_BREAKDOWN = """
+    PLATFORM_BREAKDOWN("""
             SELECT platform,
                    COUNT(*)                                                       AS play_count,
                    ROUND(SUM(ms_played) / 3600000.0, 1)                           AS hours_played,
@@ -91,9 +88,9 @@ public final class BehaviourStats {
             WHERE platform IS NOT NULL
               AND spotify_track_uri IS NOT NULL
             GROUP BY platform
-            ORDER BY hours_played DESC;""";
+            ORDER BY hours_played DESC;"""),
 
-    public static final String PLATFORM_PER_YEAR = """
+    PLATFORM_PER_YEAR("""
             SELECT STRFTIME('%Y', time_stamp)           AS year,
                    platform,
                    COUNT(*)                             AS play_count,
@@ -102,9 +99,9 @@ public final class BehaviourStats {
             WHERE platform IS NOT NULL
               AND spotify_track_uri IS NOT NULL
             GROUP BY year, platform
-            ORDER BY year, hours_played DESC;""";
+            ORDER BY year, hours_played DESC;"""),
 
-    public static final String OFFLINE_VS_ONLINE = """
+    OFFLINE_VS_ONLINE("""
             SELECT CASE WHEN offline = 1 THEN 'Offline' ELSE 'Online' END AS mode,
                    COUNT(*)                                               AS play_count,
                    ROUND(SUM(ms_played) / 3600000.0, 1)                   AS hours_played,
@@ -112,9 +109,9 @@ public final class BehaviourStats {
             FROM songs
             WHERE offline IS NOT NULL
               AND spotify_track_uri IS NOT NULL
-            GROUP BY offline;""";
+            GROUP BY offline;"""),
 
-    public static final String INCOGNITO_BREAKDOWN = """
+    INCOGNITO_BREAKDOWN("""
             SELECT CASE WHEN incognito_mode = 1 THEN 'Incognito' ELSE 'Normal' END AS mode,
                    COUNT(*)                                                        AS play_count,
                    ROUND(SUM(ms_played) / 3600000.0, 1)                            AS hours_played,
@@ -122,9 +119,9 @@ public final class BehaviourStats {
             FROM songs
             WHERE incognito_mode IS NOT NULL
               AND spotify_track_uri IS NOT NULL
-            GROUP BY incognito_mode;""";
+            GROUP BY incognito_mode;"""),
 
-    public static final String INCOGNITO_TRACKS = """
+    INCOGNITO_TRACKS("""
             SELECT master_metadata_track_name        AS track,
                    master_metadata_album_artist_name AS artist,
                    COUNT(*)                          AS incognito_plays
@@ -133,9 +130,9 @@ public final class BehaviourStats {
               AND master_metadata_track_name IS NOT NULL
             GROUP BY spotify_track_uri
             ORDER BY incognito_plays DESC
-            LIMIT 30;""";
+            LIMIT 30;"""),
 
-    public static final String REASON_START = """
+    REASON_START("""
             SELECT reason_start,
                    COUNT(*)                                           AS count,
                    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct
@@ -143,9 +140,9 @@ public final class BehaviourStats {
             WHERE reason_start IS NOT NULL
               AND spotify_track_uri IS NOT NULL
             GROUP BY reason_start
-            ORDER BY count DESC;""";
+            ORDER BY count DESC;"""),
 
-    public static final String REASON_END = """
+    REASON_END("""
             SELECT reason_end,
                    COUNT(*)                                           AS count,
                    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct
@@ -153,9 +150,9 @@ public final class BehaviourStats {
             WHERE reason_end IS NOT NULL
               AND spotify_track_uri IS NOT NULL
             GROUP BY reason_end
-            ORDER BY count DESC;""";
+            ORDER BY count DESC;"""),
 
-    public static final String REASON_END_LABELLED = """
+    REASON_END_LABELLED("""
             SELECT CASE
                        WHEN reason_end = 'trackdone' THEN 'Finished naturally'
                        WHEN reason_end = 'fwdbtn' THEN 'Skipped forward'
@@ -171,9 +168,9 @@ public final class BehaviourStats {
             WHERE reason_end IS NOT NULL
               AND spotify_track_uri IS NOT NULL
             GROUP BY reason_end
-            ORDER BY count DESC;""";
+            ORDER BY count DESC;"""),
 
-    public static final String PER_USER_TOTALS = """
+    PER_USER_TOTALS("""
             SELECT username,
                    COUNT(*)                                          AS total_plays,
                    ROUND(SUM(ms_played) / 3600000.0, 1)              AS total_hours,
@@ -183,9 +180,9 @@ public final class BehaviourStats {
             WHERE username IS NOT NULL
               AND spotify_track_uri IS NOT NULL
             GROUP BY username
-            ORDER BY total_hours DESC;""";
+            ORDER BY total_hours DESC;"""),
 
-    public static final String PER_USER_TOP_ARTIST = """
+    PER_USER_TOP_ARTIST("""
             WITH ranked AS (SELECT username,
                                    master_metadata_album_artist_name                                AS artist,
                                    SUM(ms_played)                                                   AS ms,
@@ -197,5 +194,15 @@ public final class BehaviourStats {
                             GROUP BY username, master_metadata_album_artist_name)
             SELECT username, artist, ROUND(ms / 3600000.0, 1) AS hours
             FROM ranked
-            WHERE rnk = 1;""";
+            WHERE rnk = 1;""");
+
+    private final String query;
+
+    BehaviourStats(String query) {
+        this.query = query;
+    }
+
+    public String getQuery() {
+        return query;
+    }
 }
