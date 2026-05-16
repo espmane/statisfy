@@ -1,6 +1,6 @@
 package org.example.stats;
 
-public enum BehaviourStats {
+public enum BehaviourStats implements Stat {
 
     OVERALL_SKIP_RATE("""
             SELECT COUNT(*)                                  AS total_plays,

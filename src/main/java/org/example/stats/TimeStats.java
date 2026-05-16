@@ -1,6 +1,6 @@
 package org.example.stats;
 
-public enum TimeStats {
+public enum TimeStats implements Stat {
 
     BY_YEAR("""
             SELECT STRFTIME('%Y', time_stamp)                        AS year,

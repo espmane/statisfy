@@ -1,6 +1,6 @@
 package org.example.stats;
 
-public enum TrackStats {
+public enum TrackStats implements Stat {
 
     TOP_50_BY_PLAY_COUNT("""
             SELECT master_metadata_track_name           AS track,
